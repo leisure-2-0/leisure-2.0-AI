@@ -1,0 +1,15 @@
+# TODO: 공통 설정
+#   spring.application.name=ai
+#   spring.ai.ollama.base-url, spring.ai.ollama.chat.model (카나나)
+#     - Ollama 임베딩 모델 자동 설정과 충돌 방지 필요:
+#       spring.ai.ollama.embedding.enabled=false (BgeM3EmbeddingModel만 쓰도록)
+#   spring.ai.vectorstore.qdrant.host / port / use-tls / api-key
+#     - 컬렉션명은 여기서 지정하지 않음 (posts/festivals 2개 컬렉션은
+#       VectorStoreConfig에서 QdrantClient 빈을 재사용해 직접 두 개 빈으로 등록)
+#   onnx.models.embedding-path=models/bge-m3
+#   onnx.models.reranker-path=models/bge-reranker-v2-m3
+#   internal-auth.api-key (메인 백엔드 <-> AI 서버 간 내부 호출 인증 키)
+#
+# application-local.yml / application-prod.yml 로 프로필 분리
+#   - local: docker-compose로 띄운 Qdrant/Ollama localhost 주소
+#   - prod: 운영 인프라 주소, 시크릿은 환경변수로 주입 (yml에 직접 하드코딩 금지)

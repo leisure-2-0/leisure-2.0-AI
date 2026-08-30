@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '4.1.1'
+	id 'org.springframework.boot' version '4.0.6'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -28,7 +28,11 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'org.springframework.ai:spring-ai-starter-model-ollama'
 	implementation 'org.springframework.ai:spring-ai-starter-vector-store-qdrant'
-	implementation 'org.springframework.ai:spring-ai-vector-store-advisor'
+
+	// BGE-M3 / bge-reranker-v2-m3 ONNX 추론용 (Spring AI에 대응 추상화 없음)
+	implementation 'com.microsoft.onnxruntime:onnxruntime:1.19.2'
+	implementation 'ai.djl.huggingface:tokenizers:0.31.1'
+
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'

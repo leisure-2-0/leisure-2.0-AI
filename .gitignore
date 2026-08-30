@@ -35,3 +35,8 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### ONNX models (용량 큰 바이너리 - Git LFS 도입 전까지 커밋 제외) ###
+models/**/*.onnx
+models/**/*.json
+!models/**/.gitkeep

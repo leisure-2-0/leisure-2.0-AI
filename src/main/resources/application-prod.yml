@@ -1,0 +1,3 @@
+# TODO: 운영 프로필
+#   - 실제 Qdrant/Ollama 인프라 주소
+#   - internal-auth 키, 기타 시크릿은 환경변수(${ENV_VAR}) 참조로만 작성
