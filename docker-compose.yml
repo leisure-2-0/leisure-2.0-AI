@@ -1,6 +1,47 @@
-# TODO: Qdrant, Ollama 로컬 개발용 컴포즈 구성
-#   - qdrant/qdrant 이미지, gRPC(6334)/REST(6333) 포트, 볼륨 마운트로 데이터 영속화
-#   - ollama/ollama 이미지, 11434 포트, 볼륨 마운트로 모델 캐시 영속화
-#     (카나나 모델은 컨테이너 최초 기동 후 `ollama pull`로 받아야 함 - entrypoint 스크립트로 자동화할지 결정)
-#   - AI 서비스 컨테이너(이 리포의 Dockerfile)를 같은 네트워크에 넣을지,
-#     로컬 개발 시엔 Qdrant/Ollama만 띄우고 AI 서비스는 IDE에서 직접 구동할지 결정
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.12.4
+    container_name: leisure-qdrant
+    ports:
+      - "6333:6333" # REST
+      - "6334:6334" # gRPC (Spring AI qdrant starter 기본값)
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: leisure-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    # GPU로 돌리려면 아래 주석 해제 (NVIDIA Container Toolkit 설치 필요)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  # ollama 이미지는 모델을 담고 있지 않아서, 컨테이너가 뜬 뒤 최초 1회 모델을 받아야 함.
+  # 완료 후 자동 종료되는 1회성 컨테이너.
+  ollama-pull:
+    image: ollama/ollama:latest
+    container_name: leisure-ollama-pull
+    depends_on:
+      ollama:
+        condition: service_healthy
+    entrypoint: ["sh", "-c", "OLLAMA_HOST=ollama:11434 ollama pull ${OLLAMA_MODEL:kanana-2-3b-instruct.Q8_0}"]
+    restart: "no"
+
+volumes:
+  qdrant_storage:
+  ollama_data:
