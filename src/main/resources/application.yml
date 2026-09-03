@@ -1,15 +1,38 @@
-# TODO: 공통 설정
-#   spring.application.name=ai
-#   spring.ai.ollama.base-url, spring.ai.ollama.chat.model (카나나)
-#     - Ollama 임베딩 모델 자동 설정과 충돌 방지 필요:
-#       spring.ai.ollama.embedding.enabled=false (BgeM3EmbeddingModel만 쓰도록)
-#   spring.ai.vectorstore.qdrant.host / port / use-tls / api-key
-#     - 컬렉션명은 여기서 지정하지 않음 (posts/festivals 2개 컬렉션은
-#       VectorStoreConfig에서 QdrantClient 빈을 재사용해 직접 두 개 빈으로 등록)
-#   onnx.models.embedding-path=models/bge-m3
-#   onnx.models.reranker-path=models/bge-reranker-v2-m3
-#   internal-auth.api-key (메인 백엔드 <-> AI 서버 간 내부 호출 인증 키)
-#
-# application-local.yml / application-prod.yml 로 프로필 분리
-#   - local: docker-compose로 띄운 Qdrant/Ollama localhost 주소
-#   - prod: 운영 인프라 주소, 시크릿은 환경변수로 주입 (yml에 직접 하드코딩 금지)
+spring:
+  application:
+    name: ai
+  # 로컬 전용 시크릿 파일 (없어도 기동은 됨 - optional:). 새로 클론했으면
+  # application-secret.yml.example을 application-secret.yml로 복사해서 채워 넣을 것.
+  config:
+    import: optional:classpath:application-secret.yml
+  ai:
+    model:
+      # spring-ai-starter-model-ollama가 기본으로 OllamaEmbeddingModel 빈도 자동 등록해버림
+      # (spring.ai.model.embedding이 없으면 matchIfMissing=true로 켜짐) - 그대로 두면
+      # embedding.BgeM3EmbeddingModel 빈과 타입이 겹쳐서 VectorStoreConfig가 EmbeddingModel을
+      # 주입받을 때 "여러 개 후보" 에러가 남. 여기서 꺼서 BgeM3EmbeddingModel만 쓰도록 강제.
+      embedding: none
+    ollama:
+      base-url: http://localhost:11434
+      # chat:
+      #   model: # TODO - 카나나 Ollama 모델명 확정되면 채우기 (docker-compose의 OLLAMA_MODEL 기본값과 맞출 것)
+    vectorstore:
+      qdrant:
+        host: localhost
+        port: 6334
+        use-tls: false
+        # collection-name은 여기서 안 씀 - posts/festivals 두 컬렉션은
+        # global.config.VectorStoreConfig가 이 host/port로 QdrantClient를 직접 만들어 등록함
+  autoconfigure:
+    exclude:
+      # spring-ai-starter-vector-store-qdrant의 기본 단일 컬렉션 VectorStore 자동 설정을 끔.
+      # 이유 1) 컬렉션이 1개라고 가정해서 posts/festivals 2개가 필요한 우리 구조와 안 맞음
+      # 이유 2) 이 자동 설정은 빈 생성 시점(앱 기동 중)에 바로 Qdrant에 연결을 시도해서,
+      #        Qdrant가 아직 안 떠 있으면 우리가 안 쓰는 빈 때문에 앱 기동 자체가 실패함
+      - org.springframework.ai.vectorstore.qdrant.autoconfigure.QdrantVectorStoreAutoConfiguration
+
+# onnx:
+#   models:
+#     embedding-path: models/bge-m3 # BgeM3EmbeddingModel의 @Value 기본값과 동일 (명시적으로 안 적어도 됨)
+
+# internal-auth.api-key는 application-secret.yml(gitignore 대상)에서 옴 - 위 spring.config.import 참고

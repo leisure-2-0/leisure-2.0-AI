@@ -40,3 +40,9 @@ out/
 models/**/*.onnx
 models/**/*.json
 !models/**/.gitkeep
+
+### 로컬 시크릿 (실제 값은 커밋 금지 - application-secret.yml.example만 커밋) ###
+application-secret.yml
+src/main/resources/application-secret.yml
+
+Readme.md

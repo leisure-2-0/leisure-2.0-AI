@@ -1,6 +1,43 @@
 package com.leisure.ai.global.config;
 
-// TODO
-// - 메인 백엔드에서만 호출 가능하도록 내부 API 키 헤더(예: X-Internal-Api-Key) 검증하는 필터
-// - /ai/index/**, /ai/chat 요청에 적용, 미인증 시 401
-// - application.yml의 internal-auth.api-key 값과 비교
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+
+// 메인 백엔드만 /ai/index/**, /ai/chat을 호출할 수 있도록 내부 API 키 헤더를 검증.
+@Component
+public class InternalAuthFilter extends OncePerRequestFilter {
+    // 메인 벡엔드에서 요청 시 헤더에 넣어 보내는 키 이름  
+    private static final String HEADER_NAME = "X-Internal-Api-Key"; 
+    private final String expectedApiKey;
+
+    public InternalAuthFilter(@Value("${internal-auth.api-key:}") String expectedApiKey) { this.expectedApiKey = expectedApiKey;}
+
+    @Override // 키 검증 
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        if (isProtectedPath(request.getRequestURI()) && !isAuthorized(request)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+        filterChain.doFilter(request, response);
+    }
+
+    private boolean isProtectedPath(String path) {
+        return path.startsWith("/ai/index") || path.startsWith("/ai/chat");
+    }
+
+    private boolean isAuthorized(HttpServletRequest request) {
+        // 키가 아예 설정 안 돼 있으면 fail-closed(전부 거부) - fail-open보다 안전한 기본값
+        if (expectedApiKey.isBlank()) {
+            return false;
+        }
+        return expectedApiKey.equals(request.getHeader(HEADER_NAME));
+    }
+}

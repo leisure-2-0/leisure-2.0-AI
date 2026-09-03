@@ -1,6 +1,15 @@
 package com.leisure.ai.global.config;
 
-// TODO
-// - ONNX Runtime의 OrtEnvironment는 프로세스당 하나만 두는 게 권장되므로,
-//   공유 OrtEnvironment 빈을 여기서 등록 (embedding.BgeM3EmbeddingModel, embedding.OnnxRerankerModel이 재사용)
-// - 모델 파일 경로(application.yml의 onnx.models.*)를 읽어 각 컴포넌트에 전달
+import ai.onnxruntime.OrtEnvironment;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class OnnxConfig {
+    // OrtEnvironment.getEnvironment()는 ONNX Runtime이 내부적으로 관리하는 프로세스 전역 싱글턴.
+    // 여기서는 다른 컴포넌트에 DI로 주입해서 쓰기 위해 빈으로만 노출.
+    @Bean
+    public OrtEnvironment ortEnvironment() {
+        return OrtEnvironment.getEnvironment();
+    }
+}

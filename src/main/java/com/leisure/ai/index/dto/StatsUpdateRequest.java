@@ -1,4 +1,11 @@
 package com.leisure.ai.index.dto;
 
-// TODO
-// - List<{ postId, viewCount, likeCount }> (배치 요청이라 리스트 단위)
+import jakarta.validation.constraints.NotNull;
+
+// 배치 업데이트 
+public record StatsUpdateRequest(
+        @NotNull Long postId,
+        @NotNull Long viewCount,
+        @NotNull Long likeCount 
+) {
+}

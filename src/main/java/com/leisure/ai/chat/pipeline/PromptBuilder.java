@@ -1,7 +1,37 @@
 package com.leisure.ai.chat.pipeline;
 
-// TODO (로직 문서 11단계)
-// - PromptTemplates의 시스템 프롬프트("아래 글에만 근거해 답변. 없으면 모른다고 답할 것") 사용
-// - 컨텍스트: 정렬된 문서들의 title + content 조립
-// - 질문: rewrittenQuery
-// - Spring AI ChatClient.prompt().system(...).user(...) 형태로 넘길 최종 프롬프트 구성
+import org.springframework.ai.chat.messages.SystemMessage;
+import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Component
+public class PromptBuilder {
+    public Prompt build(String rewrittenQuery, List<ScoredDocument> documents) {
+        String context = documents.stream()
+                .map(this::formatDocument)
+                .collect(Collectors.joining("\n\n"));
+
+        String userMessage = """
+                [참고 글]
+                %s
+
+                [질문]
+                %s
+                """.formatted(context, rewrittenQuery);
+
+        return new Prompt(List.of(
+                new SystemMessage(PromptTemplates.SYSTEM),
+                new UserMessage(userMessage)));
+    }
+
+    private String formatDocument(ScoredDocument scoredDocument) {
+        var metadata = scoredDocument.document().getMetadata();
+        Object title = metadata.get("title");
+        Object content = metadata.get("content");
+        return "제목: " + title + "\n내용: " + content;
+    }
+}
