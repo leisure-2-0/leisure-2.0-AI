@@ -21,6 +21,7 @@ ext {
 	set('springAiVersion', '2.0.1')
 	set('onnxRuntimeVersion', '1.19.2')
 	set('djlTokenizersVersion', '0.31.1')
+	set('jsoupVersion', '1.18.1')
 }
 
 dependencies {
@@ -48,6 +49,9 @@ dependencies {
 
 	// hugging face tokenizer
 	implementation "ai.djl.huggingface:tokenizers:${djlTokenizersVersion}"
+
+	// 게시글 본문(HTML) 정제용 - 정규식으로 태그 제거하면 script/style/엔티티 처리가 깨지기 쉬워서 사용
+	implementation "org.jsoup:jsoup:${jsoupVersion}"
 
 	// lombok
 	compileOnly 'org.projectlombok:lombok'
