@@ -23,10 +23,7 @@ public class QueryRewriter {
     public QueryRewriter(ChatClient.Builder chatClientBuilder) {this.chatClient = chatClientBuilder.build();}
 
     public Mono<QueryIntent> rewrite(ChatRequest request) {
-        if (request.history() == null || request.history().isEmpty()) { // 첫 대화면 리라이팅 스킵
-            return Mono.just(QueryIntent.fallback(request.question()));
-        }
-
+        // history가 없어도 isFestivalQuery/sortMode 판단은 필요하므로 LLM 호출은 항상 수행.
         // 블로킹 호출하지 않도록 boundedElastic 스케줄러에서 실행하도록 처리
         return Mono.fromCallable(() -> rewriteWithLlm(request))
                 .subscribeOn(Schedulers.boundedElastic())
@@ -34,9 +31,9 @@ public class QueryRewriter {
                 .onErrorReturn(QueryIntent.fallback(request.question()));
     }
 
-    // 대화 3턴을 하나로 합치기 
+    // 대화 이력을 하나로 합치기 (없으면 빈 문자열)
     private QueryIntent rewriteWithLlm(ChatRequest request) {
-        String history = request.history().stream()
+        String history = request.history() == null ? "" : request.history().stream()
                 .map(turn -> turn.role() + ": " + turn.content())
                 .collect(Collectors.joining("\n"));
 

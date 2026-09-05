@@ -1,6 +1,7 @@
 package com.leisure.ai.index;
 
 import com.leisure.ai.index.dto.StatsUpdateRequest;
+import com.leisure.ai.vector.QdrantIds;
 import io.qdrant.client.PointIdFactory;
 import io.qdrant.client.QdrantClient;
 import io.qdrant.client.ValueFactory;
@@ -36,7 +37,7 @@ public class StatsUpdateService {
             qdrantClient.setPayloadAsync(
                     COLLECTION,
                     payload,
-                    PointIdFactory.id(item.postId()),
+                    PointIdFactory.id(QdrantIds.toUuid(item.postId())),
                     true,
                     null,
                     null).get();

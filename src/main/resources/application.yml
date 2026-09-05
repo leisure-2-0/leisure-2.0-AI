@@ -14,8 +14,8 @@ spring:
       embedding: none
     ollama:
       base-url: http://localhost:11434
-      # chat:
-      #   model: # TODO - 카나나 Ollama 모델명 확정되면 채우기 (docker-compose의 OLLAMA_MODEL 기본값과 맞출 것)
+      chat:
+        model: kanana # docker-compose.yml의 OLLAMA_MODEL 기본값(ollama create로 등록되는 이름)과 동일
     vectorstore:
       qdrant:
         host: localhost
