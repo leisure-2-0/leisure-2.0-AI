@@ -2,6 +2,7 @@ package com.leisure.ai.index;
 
 import com.leisure.ai.embedding.TextPreprocessor;
 import com.leisure.ai.index.dto.PostIndexRequest;
+import com.leisure.ai.vector.QdrantIds;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,7 +34,7 @@ public class PostIndexService {
 
     // 삭제
     public void delete(Long postId) {
-        postsVectorStore.delete(List.of(String.valueOf(postId)));
+        postsVectorStore.delete(List.of(QdrantIds.toPointId(postId)));
     }
 
     // 게시글 임베딩용 Document 변환
@@ -42,16 +43,18 @@ public class PostIndexService {
                 request.title(), request.content(), request.tags());
 
         return Document.builder()
-                .id(String.valueOf(request.postId()))
+                .id(QdrantIds.toPointId(request.postId()))
                 .text(embeddingText)
                 .metadata(toPayload(request))
                 .build();
     }
 
     // 게시글 임베딩용 Document의 metadata 변환
+    // Spring AI QdrantValueFactory가 Long은 문자열로, Integer는 숫자로 직렬화하는 차이가 있어서
+    // (정렬/필터가 걸리는 카운트/날짜/id 필드는) Integer로 캐스팅해서 넣음.
     private Map<String, Object> toPayload(PostIndexRequest request) {
         Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("post_id", request.postId());
+        payload.put("post_id", request.postId().intValue());
         payload.put("title", request.title());
         payload.put("content", request.content());
         payload.put("region", request.region());
@@ -59,9 +62,9 @@ public class PostIndexService {
         payload.put("category", request.category());
         payload.put("tags", request.tags());
         payload.put("status", "APPROVED"); // 이 서비스로 upsert되는 글은 항상 승인된 상태
-        payload.put("view_count", request.viewCount() == null ? 0L : request.viewCount());
-        payload.put("like_count", request.likeCount() == null ? 0L : request.likeCount());
-        payload.put("created_at", request.createdAt());
+        payload.put("view_count", request.viewCount() == null ? 0 : request.viewCount().intValue());
+        payload.put("like_count", request.likeCount() == null ? 0 : request.likeCount().intValue());
+        payload.put("created_at", request.createdAt().intValue());
         return payload;
     }
 }
