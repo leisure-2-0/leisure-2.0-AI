@@ -1,3 +1,6 @@
+internal-auth:
+  api-key: ${INTERNAL_AUTH_API_KEY}
+
 # TODO: 운영 프로필
-#   - 실제 Qdrant/Ollama 인프라 주소
-#   - internal-auth 키, 기타 시크릿은 환경변수(${ENV_VAR}) 참조로만 작성
+#   - 실제 Qdrant/Ollama 인프라 주소 (spring.ai.vectorstore.qdrant.host/port, spring.ai.ollama.base-url)
+#   - 위 값들도 시크릿이면 환경변수(${ENV_VAR}) 참조로 작성

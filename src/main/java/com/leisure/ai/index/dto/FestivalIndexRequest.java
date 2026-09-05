@@ -1,5 +1,16 @@
 package com.leisure.ai.index.dto;
 
-// TODO
-// - festivalId(contentId), title, description(정제된 overview), address, region,
-//   startDate, endDate, isFree
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+// 축제 컬렉션
+public record FestivalIndexRequest(
+        @NotNull Long festivalId,
+        @NotBlank String title,
+        String description,
+        String address,
+        String region,
+        Long startDate, 
+        @NotNull Long endDate 
+) {
+}

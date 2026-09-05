@@ -1,5 +1,21 @@
 package com.leisure.ai.index.dto;
 
-// TODO
-// - postId, title, content, region, regionDetail, category, tags, priceRange,
-//   partySize, viewCount, likeCount, createdAt (로직 문서 A-1 요청 바디 그대로)
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
+
+// 게시글 컬렉션
+public record PostIndexRequest(
+        @NotNull Long postId,
+        @NotBlank String title,
+        @NotBlank String content,
+        String region,
+        String regionDetail,
+        String category,
+        List<String> tags,
+        Long viewCount,
+        Long likeCount,
+        @NotNull Long createdAt // epoch seconds
+) {
+}

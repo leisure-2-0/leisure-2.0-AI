@@ -36,7 +36,14 @@ out/
 ### VS Code ###
 .vscode/
 
-### ONNX models (용량 큰 바이너리 - Git LFS 도입 전까지 커밋 제외) ###
+### ONNX/GGUF models (용량 큰 바이너리 - Git LFS 도입 전까지 커밋 제외) ###
 models/**/*.onnx
 models/**/*.json
+models/**/*.gguf
 !models/**/.gitkeep
+
+### 로컬 시크릿 (실제 값은 커밋 금지 - application-secret.yml.example만 커밋) ###
+application-secret.yml
+src/main/resources/application-secret.yml
+
+Readme.md
