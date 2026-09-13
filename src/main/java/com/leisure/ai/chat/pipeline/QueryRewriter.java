@@ -12,15 +12,23 @@ import java.util.stream.Collectors;
 @Component
 public class QueryRewriter {
 
-    private static final String SYSTEM = """
+    private static final String SYSTEM_TEMPLATE = """
             대화 이력과 새 질문을 보고, 검색에 쓸 독립적인 질문으로 다시 써라(rewrittenQuery).
             정렬 의도가 있으면 sortMode를 RELEVANCE/POPULARITY/RECENT 중 하나로 판단하고, 없으면 RELEVANCE로 두어라.
             질문이 축제/행사에 관한 것이면 isFestivalQuery를 true로, 아니면 false로 판단하라.
+            질문에 특정 지역이 언급되면, 아래 [지역 목록]에서 정확히 일치하는 이름 하나를 골라 region에 채워라.
+            목록에 없는 지역명을 만들어내지 말고, 지역 언급이 없거나 목록에서 찾을 수 없으면 region은 null로 두어라.
+            [지역 목록]
+            %s
             """;
 
     private final ChatClient chatClient;
+    private final String system;
 
-    public QueryRewriter(ChatClient.Builder chatClientBuilder) {this.chatClient = chatClientBuilder.build();}
+    public QueryRewriter(ChatClient.Builder chatClientBuilder, RegionWhitelist regionWhitelist) {
+        this.chatClient = chatClientBuilder.build();
+        this.system = SYSTEM_TEMPLATE.formatted(regionWhitelist.joined());
+    }
 
     public Mono<QueryIntent> rewrite(ChatRequest request) {
         // history가 없어도 isFestivalQuery/sortMode 판단은 필요하므로 LLM 호출은 항상 수행.
@@ -38,7 +46,7 @@ public class QueryRewriter {
                 .collect(Collectors.joining("\n"));
 
         return chatClient.prompt()
-                .system(SYSTEM)
+                .system(system)
                 .user("""
                         [대화 이력]
                         %s

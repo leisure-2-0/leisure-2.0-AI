@@ -54,7 +54,7 @@ public class ChatService {
                         intent.rewrittenQuery(), intent.sortMode(), intent.isFestivalQuery()))
                 .flatMapMany(intent -> {
                     // 컬렉션 선택 + 조건 추출
-                    CollectionRouter.Route route = collectionRouter.route(intent, request.filters());
+                    CollectionRouter.Route route = collectionRouter.route(intent);
                     log.info("[chat] 2) 컬렉션 라우팅: {} filter={}", route.collection(), route.filter());
 
                     // 검색 -> 재정렬 -> 정렬 -> 응답 생성
