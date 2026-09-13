@@ -11,14 +11,15 @@ public class CollectionRouter {
     public enum Collection { POSTS, FESTIVALS }
     public record Route(Collection collection, SearchFilter filter) {}
 
-    public Route route(QueryIntent intent, SearchFilter baseFilter) {
+    public Route route(QueryIntent intent) {
         if (intent.isFestivalQuery()) {
-            // 축제 payload엔 status 필드 자체가 없어서 null로 둠 (SearchFilterMapper 참고).
-            // 대신 종료된 축제는 제외하도록 end_date >= 오늘 조건을 채움.
-            SearchFilter festivalFilter = new SearchFilter(
-                    baseFilter.region(), null, Instant.now().getEpochSecond());
+            // 축제는 메인 백엔드에 /ai/index/festival 색인 호출 자체가 아직 없어서, 색인될 region 값이
+            // 게시글(카카오 region_2depth_name)과 같은 포맷일지 확정되지 않았다. 포맷이 정해지기 전까지는
+            // region 필터를 걸지 않고 종료된 축제만 제외한다(end_date >= 오늘). 포맷이 정해지면 아래 주석 해제.
+            // SearchFilter festivalFilter = new SearchFilter(intent.region(), Instant.now().getEpochSecond());
+            SearchFilter festivalFilter = new SearchFilter(null, Instant.now().getEpochSecond());
             return new Route(Collection.FESTIVALS, festivalFilter);
         }
-        return new Route(Collection.POSTS, baseFilter);
+        return new Route(Collection.POSTS, new SearchFilter(intent.region(), null));
     }
 }
