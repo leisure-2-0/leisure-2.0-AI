@@ -16,6 +16,10 @@ spring:
       base-url: http://localhost:11434
       chat:
         model: kanana # docker-compose.yml의 OLLAMA_MODEL 기본값(ollama create로 등록되는 이름)과 동일
+        options:
+          # Modelfile에 num_ctx가 없어 Ollama 기본값(2048)으로 동작 중이었음. PromptBuilder가
+          # 리랭킹된 문서 최대 5개를 통째로 프롬프트에 이어붙이는 구조라 2048로는 금방 넘쳐서 올림.
+          num-ctx: 8192
     vectorstore:
       qdrant:
         host: localhost
